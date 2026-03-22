@@ -13,42 +13,17 @@ if (savedScore !== null) {
   scoreElement.innerText = `Your score is ${savedScore} out of 5.`;
 }
 
-// MODIFY renderQuestions (do NOT call before questions is defined)
-function renderQuestions() {
-  questionsElement.innerHTML = "";
+// ✅ Use EVENT DELEGATION (IMPORTANT)
+questionsElement.addEventListener("change", function (e) {
+  if (e.target.type === "radio") {
+    const name = e.target.name; // question-0
+    const index = name.split("-")[1];
 
-  for (let i = 0; i < questions.length; i++) {
-    const question = questions[i];
+    userAnswers[index] = e.target.value;
 
-    const questionElement = document.createElement("div");
-    questionElement.appendChild(document.createTextNode(question.question));
-
-    for (let j = 0; j < question.choices.length; j++) {
-      const choice = question.choices[j];
-
-      const input = document.createElement("input");
-      input.type = "radio";
-      input.name = `question-${i}`;
-      input.value = choice;
-
-      // Restore checked
-      if (userAnswers[i] === choice) {
-        input.setAttribute("checked", "true"); // IMPORTANT for Cypress
-      }
-
-      // Save progress
-      input.addEventListener("change", () => {
-        userAnswers[i] = choice;
-        sessionStorage.setItem("progress", JSON.stringify(userAnswers));
-      });
-
-      questionElement.appendChild(input);
-      questionElement.appendChild(document.createTextNode(choice));
-    }
-
-    questionsElement.appendChild(questionElement);
+    sessionStorage.setItem("progress", JSON.stringify(userAnswers));
   }
-}
+});
 
 // Submit logic
 submitBtn.addEventListener("click", () => {
@@ -64,11 +39,6 @@ submitBtn.addEventListener("click", () => {
 
   localStorage.setItem("score", score);
 });
-
-// ✅ IMPORTANT: Call AFTER everything is defined
-window.onload = function () {
-  renderQuestions();
-};
 // Do not change code below this line
 // This code will just display the questions to the screen
 const questions = [
