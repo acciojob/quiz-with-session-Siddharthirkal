@@ -4,63 +4,53 @@ const questionsElement = document.getElementById("questions");
 const submitBtn = document.getElementById("submit");
 const scoreElement = document.getElementById("score");
 
-// Load saved progress from sessionStorage
+// Load progress
 let userAnswers = JSON.parse(sessionStorage.getItem("progress")) || {};
 
-// Load saved score from localStorage (after submission)
+// Load saved score
 const savedScore = localStorage.getItem("score");
 if (savedScore !== null) {
   scoreElement.innerText = `Your score is ${savedScore} out of 5.`;
 }
 
-// Render Questions
+// MODIFY renderQuestions (do NOT call before questions is defined)
 function renderQuestions() {
-  questionsElement.innerHTML = ""; // clear before rendering
+  questionsElement.innerHTML = "";
 
   for (let i = 0; i < questions.length; i++) {
     const question = questions[i];
 
     const questionElement = document.createElement("div");
+    questionElement.appendChild(document.createTextNode(question.question));
 
-    // Question text
-    const questionText = document.createElement("p");
-    questionText.innerText = question.question;
-    questionElement.appendChild(questionText);
-
-    // Choices
     for (let j = 0; j < question.choices.length; j++) {
       const choice = question.choices[j];
-
-      const label = document.createElement("label");
 
       const input = document.createElement("input");
       input.type = "radio";
       input.name = `question-${i}`;
       input.value = choice;
 
-      // Restore checked value from sessionStorage
+      // Restore checked
       if (userAnswers[i] === choice) {
-        input.checked = true;
+        input.setAttribute("checked", "true"); // IMPORTANT for Cypress
       }
 
-      // Save progress on selection
+      // Save progress
       input.addEventListener("change", () => {
         userAnswers[i] = choice;
         sessionStorage.setItem("progress", JSON.stringify(userAnswers));
       });
 
-      label.appendChild(input);
-      label.appendChild(document.createTextNode(choice));
-
-      questionElement.appendChild(label);
-      questionElement.appendChild(document.createElement("br"));
+      questionElement.appendChild(input);
+      questionElement.appendChild(document.createTextNode(choice));
     }
 
     questionsElement.appendChild(questionElement);
   }
 }
 
-// Submit Quiz
+// Submit logic
 submitBtn.addEventListener("click", () => {
   let score = 0;
 
@@ -70,15 +60,15 @@ submitBtn.addEventListener("click", () => {
     }
   }
 
-  // Display score
   scoreElement.innerText = `Your score is ${score} out of 5.`;
 
-  // Save score in localStorage
   localStorage.setItem("score", score);
 });
 
-// Initial render
-renderQuestions();
+// ✅ IMPORTANT: Call AFTER everything is defined
+window.onload = function () {
+  renderQuestions();
+};
 // Do not change code below this line
 // This code will just display the questions to the screen
 const questions = [
